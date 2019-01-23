@@ -1,5 +1,5 @@
 {
-  "name": "home-monitor",
+  "name": "media-analyzer",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -8,15 +8,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/champgm/home-monitor.git"
+    "url": "git+https://github.com/champgm/media-analyzer.git"
   },
   "author": "",
   "license": "GPL-3.0-or-later",
   "bugs": {
-    "url": "https://github.com/champgm/home-monitor/issues"
+    "url": "https://github.com/champgm/media-analyzer/issues"
   },
-  "homepage": "https://github.com/champgm/home-monitor#readme",
+  "homepage": "https://github.com/champgm/media-analyzer#readme",
   "dependencies": {
+    "circular-json": "^0.5.9",
     "express": "^4.16.4",
     "lodash.isstring": "^4.0.1",
     "path": "^0.12.7",

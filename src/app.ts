@@ -1,9 +1,9 @@
 import bodyParser from 'body-parser';
 import express from 'express';
 // import path from 'path';
-import configuration from '../configuration';
+import { configuration } from '../configuration';
 import { enumerateError } from './common/ObjectUtil';
-import { IpCheckerTask } from './task/IpChecker';
+import JSON from 'circular-json';
 
 export function asyncHandler(handler: (request, response) => Promise<any>) {
   return async (request, response, next) => {
@@ -35,6 +35,18 @@ router.get(
   }),
 );
 
+router.post(
+  '/text-analyze',
+  asyncHandler(async (request) => {
+    console.log(`Got analyze request: ${JSON.stringify(request, null, 2)}`);
+    const ok = {
+      code: 200,
+      payload: { status: 'ok' },
+    };
+    return ok;
+  }),
+);
+
 export const expressApp = express();
 expressApp.use('/', router);
 
@@ -49,9 +61,3 @@ try {
   console.log(`Error caught!`);
   console.log(`${JSON.stringify(enumerateError(error), null, 2)}`);
 }
-
-console.log(`Starting tasks...`);
-const tasks: IpCheckerTask[] = [new IpCheckerTask()];
-tasks.forEach((task) => {
-  task.start();
-});
