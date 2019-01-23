@@ -4,6 +4,11 @@ import express from 'express';
 import { configuration } from '../configuration';
 import { enumerateError } from './common/ObjectUtil';
 import JSON from 'circular-json';
+import { TwilioMessage } from './twilio/TwilioMessage';
+import fs from 'fs';
+import { saveFile, sendSms } from './twilio/Twilio';
+import { getText } from './ocr/Ocr';
+import { search } from './ocr/Search';
 
 export function asyncHandler(handler: (request, response) => Promise<any>) {
   return async (request, response, next) => {
@@ -38,7 +43,23 @@ router.get(
 router.post(
   '/text-analyze',
   asyncHandler(async (request) => {
-    console.log(`Got analyze request: ${JSON.stringify(request, null, 2)}`);
+    const twilioMessage: TwilioMessage = request.body;
+    try {
+      const basePath = `${__dirname}/../media`;
+      console.log(`Saving file...`);
+      const savePath = await saveFile(twilioMessage, basePath);
+      console.log(`Running OCR...`);
+      const textInImage = await getText(savePath, configuration.badIngredientsPath);
+      console.log(`Searching text...`);
+      const searchResults = await search(configuration.badIngredients, textInImage);
+      const stringResults = searchResults.join('\n');
+      console.log(`Sending result...`);
+      await sendSms(twilioMessage.From, stringResults, configuration);
+    } catch (error) {
+      const errorMessage = `Encountered an error, sorry =(\n ${JSON.stringify(enumerateError(error), null, 2)}`;
+      console.log(errorMessage);
+      await sendSms(twilioMessage.From, errorMessage, configuration);
+    }
     const ok = {
       code: 200,
       payload: { status: 'ok' },

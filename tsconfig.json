@@ -19,10 +19,7 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "noImplicitAny": false,
-    "strictNullChecks": false,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "allowUnusedLabels": true
+    "strictNullChecks": false
   },
   "include": [
     "src/**/*.ts"
