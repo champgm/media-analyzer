@@ -9,7 +9,8 @@ export async function getText(imagePath: string, userWordsPath: string) {
     // presets: ['bazaar'],
   };
   let text: string = (await tesseract.recognize(imagePath, configuration));
-  text = text.replace(new RegExp('\n', 'g'), '');
+  // text = text.replace(new RegExp('\n', 'g'), '');
+  text = text.replace(/[\r\n]+/g,'');
   console.log(`Found text: ${JSON.stringify(text)}`);
   return text;
 }
