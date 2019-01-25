@@ -50,6 +50,7 @@ router.post(
       const savePath = await saveFile(twilioMessage, basePath);
       console.log(`Running OCR...`);
       const textInImage = await getText(savePath, configuration.badIngredientsPath);
+      await sendSms(twilioMessage.From, `Detected Text: ${textInImage}`, configuration);
       console.log(`Searching text...`);
       const searchResults = await search(configuration.badIngredients, textInImage);
       const stringResults = searchResults.join('\n');
