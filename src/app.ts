@@ -54,7 +54,7 @@ router.post(
         configuration.badEnglishIngredientsPath,
         configuration.badChineseIngredientsPath,
       );
-      await sendSms(twilioMessage.From, `Detected Text: ${textInImage}`, configuration);
+      await sendSms(twilioMessage.From, `Detected Text: ${JSON.stringify(textInImage, null, 2)}`, configuration);
       console.log(`Searching text...`);
       const englishSearchPromise = search(configuration.badEnglishIngredients, textInImage.englishText);
       const chineseSearchPromise = search(configuration.badChineseIngredients, textInImage.chineseText);
