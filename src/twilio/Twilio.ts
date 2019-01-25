@@ -39,6 +39,16 @@ async function downloadFile(url: string) {
 }
 
 export async function sendSms(number: string, message: string, configuration: Configuration) {
+  let restOfMessage = message;
+  while (restOfMessage.length > 1600) {
+    const messageChunk = restOfMessage.slice(0, 1599);
+    restOfMessage = restOfMessage.slice(1599);
+    sendSmallSms(number, messageChunk, configuration);
+  }
+  return sendSmallSms(number, restOfMessage, configuration);
+}
+
+export async function sendSmallSms(number: string, message: string, configuration: Configuration) {
   const twilioClient = Twilio(configuration.twilio.accountSid, configuration.twilio.authToken);
   try {
     console.log(`Sending SMS to ${number}...`);
