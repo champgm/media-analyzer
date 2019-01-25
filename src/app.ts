@@ -49,10 +49,16 @@ router.post(
       console.log(`Saving file...`);
       const savePath = await saveFile(twilioMessage, basePath);
       console.log(`Running OCR...`);
-      const textInImage = await getText(savePath, configuration.badIngredientsPath);
+      const textInImage = await getText(
+        savePath,
+        configuration.badEnglishIngredientsPath,
+        configuration.badChineseIngredientsPath,
+      );
       await sendSms(twilioMessage.From, `Detected Text: ${textInImage}`, configuration);
       console.log(`Searching text...`);
-      const searchResults = await search(configuration.badIngredients, textInImage);
+      const englishSearchPromise = search(configuration.badEnglishIngredients, textInImage.englishText);
+      const chineseSearchPromise = search(configuration.badChineseIngredients, textInImage.chineseText);
+      const searchResults = (await englishSearchPromise).concat(await chineseSearchPromise);
       const stringResults = searchResults.join('\n');
       console.log(`Sending result...`);
       await sendSms(twilioMessage.From, stringResults, configuration);
