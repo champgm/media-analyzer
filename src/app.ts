@@ -59,7 +59,7 @@ router.post(
       const englishSearchPromise = search(configuration.badEnglishIngredients, textInImage.englishText);
       const chineseSearchPromise = search(configuration.badChineseIngredients, textInImage.chineseText);
       const searchResults = (await englishSearchPromise).concat(await chineseSearchPromise);
-      const stringResults = searchResults.join('\n');
+      const stringResults = searchResults.join('\n\n');
       console.log(`Sending result...`);
       await sendSms(twilioMessage.From, stringResults, configuration);
     } catch (error) {
