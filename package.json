@@ -4,7 +4,13 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "ts-node src/app.ts"
+    "build": "tsc",
+    "build-watch": "tsc -w",
+    "lint": "tslint src/**/*.ts --fix",
+    "package": "./create-zip.sh && aws cloudformation package --template ./cloudformation.yml --s3-bucket lambda-api-deployments --output-template ./cloudformation-packaged.yml",
+    "deploy": "aws cloudformation deploy --region us-east-2 --template-file ./cloudformation-packaged.yml --stack-name lambda-api --capabilities CAPABILITY_NAMED_IAM",
+    "invoke": "sh invoke.sh",
+    "package-deploy": "npm run package && npm run deploy"
   },
   "repository": {
     "type": "git",

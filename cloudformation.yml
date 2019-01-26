@@ -1,0 +1,85 @@
+Parameters:
+
+
+  # HostedZone:
+  #   Description: The ID of the Route 53 Hosted Zone in which resource records will be created
+  #   Type: String
+  #   Default: ZYVKAOWYZE7Y4
+
+
+  # AuthorizedAccounts:
+  #   Description: List of accounts that are allowed to create resource records
+  #   Type: CommaDelimitedList
+  #   Default: 317375912257, 903589454980
+
+
+Resources:
+
+  LambdaApi:
+    Type: AWS::Lambda::Function
+    Properties:
+      Handler: tsc-out/index.handler
+      Role: !GetAtt LambdaApiRole.Arn
+      Runtime: nodejs8.10
+      Code: ./lambda.zip
+      Environment:
+        Variables:
+          HOSTED_ZONE: !Ref HostedZone
+
+
+  LambdaApiRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: "/"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonRekognitionFullAccess
+
+
+  LambdaApiSnsTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      Subscription:
+        - Endpoint:
+            !GetAtt LambdaApi.Arn
+          Protocol: lambda
+      TopicName: LambdaApi
+
+
+  # LambdaApiSnsPolicy:
+  #   Type: AWS::SNS::TopicPolicy
+  #   Properties:
+  #     Topics:
+  #     - !Ref LambdaApi
+  #     PolicyDocument:
+  #       Version: 2008-10-17
+  #       Statement:
+  #       - Effect: Allow
+  #         Principal:
+  #           AWS: !Ref AuthorizedAccounts
+  #         Action:
+  #         - sns:Publish
+  #         Resource: !Ref RequestRoute53CNAME
+
+
+  # LambdaInvokePermission:
+  #   Type: AWS::Lambda::Permission
+  #   Properties:
+  #     Action: lambda:InvokeFunction
+  #     Principal: sns.amazonaws.com
+  #     SourceArn: !Ref RequestRoute53CNAME
+  #     FunctionName: !GetAtt CreateRoute53CNAME.Arn
+
+Outputs:
+  # ServiceToken:
+  #   Description: The arn of SNS Topic used to request a CNAME record. Share this with the subaccounts authorized to create resource records.
+  #   Value: !Ref RequestRoute53CNAME
+

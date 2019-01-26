@@ -3,3 +3,9 @@ node_modules
 **/*Example.json
 *.jpeg
 *.jpg
+node_modules
+tsc-out
+*.zip
+
+
+
