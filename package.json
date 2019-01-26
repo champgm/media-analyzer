@@ -7,7 +7,10 @@
     "build": "tsc",
     "build-watch": "tsc -w",
     "lint": "tslint src/**/*.ts --fix",
-    "package": "./create-zip.sh && aws cloudformation package --template ./cloudformation.yml --s3-bucket lambda-api-deployments --output-template ./cloudformation-packaged.yml",
+    "prune": "npm prune --production",
+    "zip": "zip -rq1 \"lambda-api.zip\" \"node_modules\"",
+    "cf-package": "aws cloudformation package --template ./cloudformation.yml --s3-bucket lambda-api-deployments --output-template ./cloudformation-packaged.yml",
+    "package": "npm run build && npm run prune && npm run zip && npm run cf-package",
     "deploy": "aws cloudformation deploy --region us-east-2 --template-file ./cloudformation-packaged.yml --stack-name lambda-api --capabilities CAPABILITY_NAMED_IAM",
     "destroy": "aws cloudformation delete-stack --stack-name lambda-api",
     "invoke": "sh invoke.sh",
@@ -24,6 +27,7 @@
   },
   "homepage": "https://github.com/champgm/media-analyzer#readme",
   "dependencies": {
+    "aws-serverless-express": "^3.3.5",
     "circular-json": "^0.5.9",
     "express": "^4.16.4",
     "fuzzysort": "^1.1.4",
@@ -40,6 +44,7 @@
     "uuid": "^3.3.2"
   },
   "devDependencies": {
+    "@types/aws-serverless-express": "^3.3.0",
     "@types/express": "^4.16.0",
     "@types/lodash.isstring": "^4.0.4",
     "@types/request-promise-native": "^1.0.15",
