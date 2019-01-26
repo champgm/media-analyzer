@@ -1,4 +1,4 @@
-Parameters:
+# Parameters:
 
 
   # HostedZone:
@@ -21,10 +21,10 @@ Resources:
       Handler: tsc-out/index.handler
       Role: !GetAtt LambdaApiRole.Arn
       Runtime: nodejs8.10
-      Code: ./lambda.zip
+      Code: ./lambda-api.zip
       Environment:
         Variables:
-          HOSTED_ZONE: !Ref HostedZone
+          PLACEHOLDER: asdf
 
 
   LambdaApiRole:
@@ -41,7 +41,7 @@ Resources:
           - sts:AssumeRole
       Path: "/"
       ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/service-role/AmazonRekognitionFullAccess
+        - arn:aws:iam::aws:policy/AmazonRekognitionFullAccess
 
 
   LambdaApiSnsTopic:
@@ -78,7 +78,7 @@ Resources:
   #     SourceArn: !Ref RequestRoute53CNAME
   #     FunctionName: !GetAtt CreateRoute53CNAME.Arn
 
-Outputs:
+# Outputs:
   # ServiceToken:
   #   Description: The arn of SNS Topic used to request a CNAME record. Share this with the subaccounts authorized to create resource records.
   #   Value: !Ref RequestRoute53CNAME
