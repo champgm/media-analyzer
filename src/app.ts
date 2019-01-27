@@ -1,14 +1,14 @@
 import bodyParser from 'body-parser';
 import express from 'express';
-// import path from 'path';
 import { configuration } from '../configuration';
 import { enumerateError, notEmpty } from './common/ObjectUtil';
 import JSON from 'circular-json';
 import { TwilioMessage } from './twilio/TwilioMessage';
 import { saveFile, sendSms } from './twilio/Twilio';
-import { getText } from './ocr/Ocr';
+import { getText } from './ocr/Tesseract';
 import { search } from './ocr/Search';
 import middleware from 'aws-serverless-express/middleware';
+import morgan from 'morgan';
 
 export function asyncHandler(handler: (request, response) => Promise<any>) {
   return async (request, response, next) => {
@@ -90,7 +90,7 @@ export async function detectBadIngredients(phoneNumber: string, englishText, chi
   const englishSearchPromise = search(configuration.badEnglishIngredients, englishText);
   const chineseSearchPromise = search(configuration.badChineseIngredients, chineseText);
   const searchResults =
-    ["Search Results:\n"]
+    ['Search Results:\n']
       .concat(await englishSearchPromise)
       .concat(await chineseSearchPromise);
   const stringResults = searchResults.join('\n\n');
@@ -100,15 +100,16 @@ export async function detectBadIngredients(phoneNumber: string, englishText, chi
 
 export const expressApp = express();
 expressApp.use('/', router);
+expressApp.use(morgan('common'));
 
 // Start the local server
-console.log(`Starting API...`);
-try {
-  const port = configuration.port;
-  expressApp.listen(port, () => {
-    console.log(`API Listening on port: ${port}`);
-  });
-} catch (error) {
-  console.log(`Error caught!`);
-  console.log(`${JSON.stringify(enumerateError(error), null, 2)}`);
-}
+// console.log(`Starting API...`);
+// try {
+//   const port = configuration.port;
+//   expressApp.listen(port, () => {
+//     console.log(`API Listening on port: ${port}`);
+//   });
+// } catch (error) {
+//   console.log(`Error caught!`);
+//   console.log(`${JSON.stringify(enumerateError(error), null, 2)}`);
+// }

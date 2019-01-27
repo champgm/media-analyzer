@@ -15,46 +15,40 @@
 
 Resources:
 
-  LambdaApi:
+  ApiLambda:
     Type: AWS::Lambda::Function
     Properties:
-      Handler: tsc-out/index.handler
-      Role: !GetAtt LambdaApiRole.Arn
+      Handler: tsc-out/src/index.handler
+      Role: !GetAtt ApiLambdaRole.Arn
       Runtime: nodejs8.10
       Code: ./lambda-api.zip
       Environment:
         Variables:
           PLACEHOLDER: asdf
 
-
-  LambdaApiRole:
+  ApiLambdaRole:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
-        Version: 2012-10-17
+        Version: "2012-10-17"
         Statement:
         - Effect: Allow
           Principal:
             Service:
             - lambda.amazonaws.com
+            - apigateway.amazonaws.com
+            - edgelambda.amazonaws.com
           Action:
-          - sts:AssumeRole
+            - sts:AssumeRole
       Path: "/"
       ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - arn:aws:iam::aws:policy/AmazonRekognitionFullAccess
+        - arn:aws:iam::aws:policy/CloudWatchFullAccess
+        - arn:aws:iam::aws:policy/AmazonSNSFullAccess
+        - arn:aws:iam::aws:policy/AmazonAPIGatewayAdministrator
 
-
-  LambdaApiSnsTopic:
-    Type: AWS::SNS::Topic
-    Properties:
-      Subscription:
-        - Endpoint:
-            !GetAtt LambdaApi.Arn
-          Protocol: lambda
-      TopicName: LambdaApi
-
-
-  LambdaApiGateway:
+  ApiLambdaGateway:
     Type: AWS::ApiGateway::RestApi
     Properties:
       Name: lambda-api
@@ -89,7 +83,7 @@ Resources:
                     - ':'
                     - !Ref 'AWS::AccountId'
                     - ':function:'
-                    - !Ref LambdaApi
+                    - !Ref ApiLambda
                     - '/invocations'
                 passthroughBehavior: "when_no_match"
                 httpMethod: "POST"
@@ -150,33 +144,32 @@ Resources:
               gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
               gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token,x-logging-context'"
 
-  LambdaApiStage:
-    Type: AWS::ApiGateway::Stage
-    Properties:
-      StageName: dev
-      Description: dev lambda-api
-      RestApiId: !Ref LambdaApiGateway
-      DeploymentId: !Ref LambdaApiDeployment
-      Variables:
-        version: dev
-
-  LambdaApiDeployment:
+  ApiLambdaDeployment:
     Type: AWS::ApiGateway::Deployment
     Properties:
-      RestApiId: !Ref LambdaApiGateway
+      RestApiId: !Ref ApiLambdaGateway
       StageName: "_"
       StageDescription:
         LoggingLevel: INFO
         MetricsEnabled: true
 
+  ApiLambdaStage:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      StageName: dev
+      Description: dev lambda-api
+      RestApiId: !Ref ApiLambdaGateway
+      DeploymentId: !Ref ApiLambdaDeployment
+      Variables:
+        version: dev
 
   # Grant permissions to the apigateway to invoke the lambda function
-  LambdaPerms:
+  ApiLambdaGatewayPermissions:
     Type: AWS::Lambda::Permission
     Properties:
-      FunctionName: !Ref LambdaApi
+      FunctionName: !GetAtt ApiLambda.Arn
       Action: lambda:InvokeFunction
       Principal: apigateway.amazonaws.com
-      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${LambdaApiGateway}/*"
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiLambdaGateway}/*"
 
 
