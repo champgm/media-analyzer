@@ -15,8 +15,9 @@ export async function search(find: string[], text: string): Promise<string[]> {
 export async function searchSplitText(find: string[], splitText: string[]) {
   const searchResults = [];
   const searchOptions = {
-    threshold: -1000,
+    threshold: -1,
   };
+  const resultsMap = {};
   const promises = find.map(async (item) => {
     const results = await fuzzysort.goAsync(item, splitText, searchOptions);
     results.forEach((result) => {

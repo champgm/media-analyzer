@@ -7,22 +7,24 @@ import fs from 'fs';
 import Twilio from 'twilio';
 import { Configuration } from 'configuration';
 
-export async function saveFile(twilioMessage: TwilioMessage, basePath: string) {
+export async function getFileBytes(twilioMessage: TwilioMessage) {
   const mediaUrl: string = twilioMessage.MediaUrl0;
-
-  let fileBytes;
   try {
-    fileBytes = await downloadFile(mediaUrl);
+    const fileBytes = await downloadFile(mediaUrl);
+    return fileBytes;
   } catch (error) {
     console.log(`Error ocurred while downloading file: ${JSON.stringify(error)}`);
     console.log(`Trimmed error: ${JSON.stringify(enumerateError(error))}`);
+    throw error;
   }
+}
 
+export async function saveFile(twilioMessage: TwilioMessage, basePath: string) {
+  const fileBytes = await getFileBytes(twilioMessage);
   const mediaType: string = twilioMessage.MediaContentType0;
   const extension = mediaType.split('/')[1];
   const fileName = v4();
   const savePath = `${basePath}/${fileName}.${extension}`;
-
   fs.writeFileSync(savePath, fileBytes);
   console.log(`File saved to '${savePath}'`);
   return savePath;
@@ -40,10 +42,14 @@ async function downloadFile(url: string) {
 
 export async function sendSms(number: string, message: string, configuration: Configuration) {
   let restOfMessage = message;
-  while (restOfMessage.length > 1600) {
-    const messageChunk = restOfMessage.slice(0, 1599);
-    restOfMessage = restOfMessage.slice(1599);
-    sendSmallSms(number, messageChunk, configuration);
+  let chunk = 1;
+  let maxChunks = restOfMessage.length / 1500;
+  while (restOfMessage.length > 1500) {
+    const messageChunk = `Message chunk ${chunk} of ${maxChunks}: \n` +
+      `${restOfMessage.slice(0, 1499)}`;
+    restOfMessage = restOfMessage.slice(1499);
+    await sendSmallSms(number, messageChunk, configuration);
+    chunk = chunk + 1;
   }
   return sendSmallSms(number, restOfMessage, configuration);
 }

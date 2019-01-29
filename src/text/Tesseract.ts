@@ -1,6 +1,6 @@
 import tesseract from 'node-tesseract-ocr';
 
-export class TessseractOcr {
+export class TesseractOcr {
   public async  getText(
     imagePath: string,
     englishWordsPath: string,
@@ -36,4 +36,3 @@ export class TessseractOcr {
   }
 
 }
-

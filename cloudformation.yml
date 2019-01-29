@@ -21,6 +21,7 @@ Resources:
       Handler: tsc-out/src/index.handler
       Role: !GetAtt ApiLambdaRole.Arn
       Runtime: nodejs8.10
+      Timeout: 30
       Code: ./lambda-api.zip
       Environment:
         Variables:
