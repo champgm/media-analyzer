@@ -28,7 +28,8 @@ export class Vision {
       const visionResponse: VisionResponse[] = await client.annotateImage(visionRequest);
       console.log(`Got vision response: ${JSON.stringify(visionResponse, null, 2)}`);
       const fullText = visionResponse[0].textAnnotations[0].description;
-      return fullText;
+      const oneLine = fullText.replace(/(\r\n|\n|\r)/gm, ',');
+      return oneLine;
     } catch (error) {
       console.log(`An error ocurred with the Vision request: `);
       console.log(`${JSON.stringify(enumerateError(error), null, 2)}`);

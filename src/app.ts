@@ -128,12 +128,12 @@ export async function detectBadIngredients(phoneNumber: string, text: string) {
   console.log(`Searching text...`);
   const searchResults = await search(configuration.badIngredients, text);
 
-  let formattedResult = 'Search Results:';
+  let formattedResult = '\nSearch Results:';
   Object.keys(searchResults).forEach((badIngredient) => {
-    formattedResult = `${formattedResult}\n`;
+    formattedResult = `${formattedResult}\n==${badIngredient}==`;
     const ingredientResults = searchResults[badIngredient];
     ingredientResults.forEach((match) => {
-      formattedResult = `${formattedResult}\n  ${match}`;
+      formattedResult = `${formattedResult}\n  ${match}\n`;
     });
   });
 

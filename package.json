@@ -9,7 +9,7 @@
     "lint": "tslint src/**/*.ts --fix",
     "prune": "npm prune --production",
     "rebuild": "npm rebuild --target=8.1.0 --target_platform=linux --target_arch=x64 --target_libc=glibc --update-binary",
-    "zip": "rm lambda-api.zip || true && zip -rq1 lambda-api.zip node_modules && cp gcloud.json tsc-out/ && cp -R media tsc-out/ && zip -gqr1 lambda-api.zip tsc-out",
+    "zip": "rm lambda-api.zip || true && zip -rq1 lambda-api.zip node_modules && cp gcloud.json tsc-out/ && zip -gqr1 lambda-api.zip tsc-out",
     "cf-package": "aws cloudformation package --template ./cloudformation.yml --s3-bucket lambda-api-deployments --output-template ./cloudformation-packaged.yml",
     "package": "npm run rebuild && npm run build && npm run zip && npm run cf-package",
     "deploy": "aws cloudformation deploy --region us-east-2 --template-file ./cloudformation-packaged.yml --stack-name lambda-api --capabilities CAPABILITY_NAMED_IAM",

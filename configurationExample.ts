@@ -20,7 +20,7 @@ export const configuration: Configuration = {
   ],
   port: 8080,
   twilio: {
-    number: '+5551235555',
+    number: '+15551235555',
     projectName: 'your project',
     accountSid: 'abc123',
     authToken: '123abc',
