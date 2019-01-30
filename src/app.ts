@@ -9,8 +9,6 @@ import { saveFile, sendSms, getFileBytes } from './twilio/Twilio';
 import { search } from './text/Search';
 import middleware from 'aws-serverless-express/middleware';
 import morgan from 'morgan';
-import { TesseractOcr } from './text/Tesseract';
-import { RekognitionOcr } from './text/Rekognition';
 import { Vision } from './text/Vision';
 
 process.on('unhandledRejection', (error) => {
@@ -94,36 +92,6 @@ export async function handleImageWithVision(twilioMessage: TwilioMessage, config
   await detectBadIngredients(twilioMessage.From, textInImage);
 }
 
-// export async function handleImageWithRekognition(twilioMessage: TwilioMessage) {
-//   console.log(`Downloading image...`);
-//   const fileBytes = await getFileBytes(twilioMessage);
-//   const rekognitionOcr = new RekognitionOcr();
-//   console.log(`Analyzing image...`);
-//   const textInImage = await rekognitionOcr.getText(fileBytes);
-
-//   const detectedTextMessage = `Detected Text: ${textInImage}`;
-//   console.log(detectedTextMessage);
-//   await sendSms(twilioMessage.From, detectedTextMessage, configuration);
-//   await detectBadIngredients(twilioMessage.From, textInImage, '');
-// }
-
-// export async function handleImageLocally(twilioMessage: TwilioMessage) {
-//   const tesseractOcr = new TesseractOcr();
-//   const basePath = `${__dirname}/../media`;
-//   console.log(`Saving file...`);
-//   const savePath = await saveFile(twilioMessage, basePath);
-//   console.log(`Running OCR...`);
-//   const textInImage = await tesseractOcr.getText(
-//     savePath,
-//     configuration.badEnglishIngredientsPath,
-//     configuration.badChineseIngredientsPath,
-//   );
-//   const detectedTextMessage = `Detected Text: ${JSON.stringify(textInImage, null, 2)}`;
-//   console.log(detectedTextMessage);
-//   await sendSms(twilioMessage.From, detectedTextMessage, configuration);
-//   await detectBadIngredients(twilioMessage.From, textInImage.englishText, textInImage.chineseText);
-// }
-
 export async function detectBadIngredients(phoneNumber: string, text: string) {
   console.log(`Searching text...`);
   const searchResults = await search(configuration.badIngredients, text);
@@ -144,15 +112,3 @@ export async function detectBadIngredients(phoneNumber: string, text: string) {
 export const expressApp = express();
 expressApp.use('/', router);
 expressApp.use(morgan('common'));
-
-// Start the local server
-// console.log(`Starting API...`);
-// try {
-//   const port = configuration.port;
-//   expressApp.listen(port, () => {
-//     console.log(`API Listening on port: ${port}`);
-//   });
-// } catch (error) {
-//   console.log(`Error caught!`);
-//   console.log(`${JSON.stringify(enumerateError(error), null, 2)}`);
-// }

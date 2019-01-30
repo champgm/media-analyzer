@@ -1,5 +1,6 @@
-import { Configuration } from '../../configurationExample';
 import vision from '@google-cloud/vision';
+
+import { Configuration } from '../../configurationExample';
 import { enumerateError } from '../common/ObjectUtil';
 
 interface VisionResponse {

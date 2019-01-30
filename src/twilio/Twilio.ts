@@ -1,11 +1,12 @@
 import { TwilioMessage } from './TwilioMessage';
-import v4 from 'uuid/v4';
-import requestPromise from 'request-promise-native';
-import JSON from 'circular-json';
-import { enumerateError } from '../common/ObjectUtil';
 import fs from 'fs';
+import JSON from 'circular-json';
+import requestPromise from 'request-promise-native';
 import Twilio from 'twilio';
+import v4 from 'uuid/v4';
+
 import { Configuration } from '../../configurationExample';
+import { enumerateError } from '../common/ObjectUtil';
 
 export async function getFileBytes(twilioMessage: TwilioMessage) {
   const mediaUrl: string = twilioMessage.MediaUrl0;
