@@ -9,7 +9,7 @@
     ],
     "declaration": true,
     "sourceMap": true,
-    "baseUrl": ".",
+    "baseUrl": "src",
     "outDir": "tsc-out",
     "strict": true,
     "moduleResolution": "node",

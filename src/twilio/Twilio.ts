@@ -5,7 +5,7 @@ import JSON from 'circular-json';
 import { enumerateError } from '../common/ObjectUtil';
 import fs from 'fs';
 import Twilio from 'twilio';
-import { Configuration } from 'configuration';
+import { Configuration } from '../../configurationExample';
 
 export async function getFileBytes(twilioMessage: TwilioMessage) {
   const mediaUrl: string = twilioMessage.MediaUrl0;
@@ -43,10 +43,9 @@ async function downloadFile(url: string) {
 export async function sendSms(number: string, message: string, configuration: Configuration) {
   let restOfMessage = message;
   let chunk = 1;
-  let maxChunks = restOfMessage.length / 1500;
+  const maxChunks = restOfMessage.length / 1500;
   while (restOfMessage.length > 1500) {
-    const messageChunk = `Message chunk ${chunk} of ${maxChunks}: \n` +
-      `${restOfMessage.slice(0, 1499)}`;
+    const messageChunk = `Message chunk ${chunk} of ${maxChunks}:\n${restOfMessage.slice(0, 1499)}`;
     restOfMessage = restOfMessage.slice(1499);
     await sendSmallSms(number, messageChunk, configuration);
     chunk = chunk + 1;

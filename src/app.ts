@@ -1,6 +1,7 @@
 import bodyParser from 'body-parser';
 import express from 'express';
-import { configuration, Configuration } from '../configuration';
+import { configuration } from '../configuration';
+import { Configuration } from '../configurationExample';
 import { enumerateError, notEmpty } from './common/ObjectUtil';
 import JSON from 'circular-json';
 import { TwilioMessage } from './twilio/TwilioMessage';
@@ -63,7 +64,6 @@ router.post(
         console.log(`No image URL found, will analyze text.`);
         await handleText(twilioMessage);
       }
-
     } catch (error) {
       const errorMessage = `Encountered an error, sorry =(\n ${JSON.stringify(enumerateError(error), null, 2)}`;
       console.log(errorMessage);
@@ -78,7 +78,7 @@ router.post(
 );
 
 export async function handleText(twilioMessage: TwilioMessage) {
-  await detectBadIngredients(twilioMessage.From, twilioMessage.Body, twilioMessage.Body);
+  await detectBadIngredients(twilioMessage.From, twilioMessage.Body);
 }
 
 export async function handleImageWithVision(twilioMessage: TwilioMessage, configuration: Configuration) {
@@ -91,50 +91,54 @@ export async function handleImageWithVision(twilioMessage: TwilioMessage, config
   const detectedTextMessage = `Detected Text: ${textInImage}`;
   console.log(detectedTextMessage);
   await sendSms(twilioMessage.From, detectedTextMessage, configuration);
-  await detectBadIngredients(twilioMessage.From, textInImage, '');
+  await detectBadIngredients(twilioMessage.From, textInImage);
 }
 
-export async function handleImageWithRekognition(twilioMessage: TwilioMessage) {
-  console.log(`Downloading image...`);
-  const fileBytes = await getFileBytes(twilioMessage);
-  const rekognitionOcr = new RekognitionOcr();
-  console.log(`Analyzing image...`);
-  const textInImage = await rekognitionOcr.getText(fileBytes);
+// export async function handleImageWithRekognition(twilioMessage: TwilioMessage) {
+//   console.log(`Downloading image...`);
+//   const fileBytes = await getFileBytes(twilioMessage);
+//   const rekognitionOcr = new RekognitionOcr();
+//   console.log(`Analyzing image...`);
+//   const textInImage = await rekognitionOcr.getText(fileBytes);
 
-  const detectedTextMessage = `Detected Text: ${textInImage}`;
-  console.log(detectedTextMessage);
-  await sendSms(twilioMessage.From, detectedTextMessage, configuration);
-  await detectBadIngredients(twilioMessage.From, textInImage, '');
-}
+//   const detectedTextMessage = `Detected Text: ${textInImage}`;
+//   console.log(detectedTextMessage);
+//   await sendSms(twilioMessage.From, detectedTextMessage, configuration);
+//   await detectBadIngredients(twilioMessage.From, textInImage, '');
+// }
 
-export async function handleImageLocally(twilioMessage: TwilioMessage) {
-  const tesseractOcr = new TesseractOcr();
-  const basePath = `${__dirname}/../media`;
-  console.log(`Saving file...`);
-  const savePath = await saveFile(twilioMessage, basePath);
-  console.log(`Running OCR...`);
-  const textInImage = await tesseractOcr.getText(
-    savePath,
-    configuration.badEnglishIngredientsPath,
-    configuration.badChineseIngredientsPath,
-  );
-  const detectedTextMessage = `Detected Text: ${JSON.stringify(textInImage, null, 2)}`;
-  console.log(detectedTextMessage);
-  await sendSms(twilioMessage.From, detectedTextMessage, configuration);
-  await detectBadIngredients(twilioMessage.From, textInImage.englishText, textInImage.chineseText);
-}
+// export async function handleImageLocally(twilioMessage: TwilioMessage) {
+//   const tesseractOcr = new TesseractOcr();
+//   const basePath = `${__dirname}/../media`;
+//   console.log(`Saving file...`);
+//   const savePath = await saveFile(twilioMessage, basePath);
+//   console.log(`Running OCR...`);
+//   const textInImage = await tesseractOcr.getText(
+//     savePath,
+//     configuration.badEnglishIngredientsPath,
+//     configuration.badChineseIngredientsPath,
+//   );
+//   const detectedTextMessage = `Detected Text: ${JSON.stringify(textInImage, null, 2)}`;
+//   console.log(detectedTextMessage);
+//   await sendSms(twilioMessage.From, detectedTextMessage, configuration);
+//   await detectBadIngredients(twilioMessage.From, textInImage.englishText, textInImage.chineseText);
+// }
 
-export async function detectBadIngredients(phoneNumber: string, englishText, chineseText) {
+export async function detectBadIngredients(phoneNumber: string, text: string) {
   console.log(`Searching text...`);
-  const englishSearchPromise = search(configuration.badEnglishIngredients, englishText);
-  const chineseSearchPromise = search(configuration.badChineseIngredients, chineseText);
-  const searchResults =
-    ['Search Results:\n']
-      .concat(await englishSearchPromise)
-      .concat(await chineseSearchPromise);
-  const stringResults = searchResults.join('\n\n');
+  const searchResults = await search(configuration.badIngredients, text);
+
+  let formattedResult = 'Search Results:';
+  Object.keys(searchResults).forEach((badIngredient) => {
+    formattedResult = `${formattedResult}\n`;
+    const ingredientResults = searchResults[badIngredient];
+    ingredientResults.forEach((match) => {
+      formattedResult = `${formattedResult}\n  ${match}`;
+    });
+  });
+
   console.log(`Sending result...`);
-  await sendSms(phoneNumber, stringResults, configuration);
+  await sendSms(phoneNumber, formattedResult, configuration);
 }
 
 export const expressApp = express();
