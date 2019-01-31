@@ -1,11 +1,9 @@
 import tesseract from 'node-tesseract-ocr';
 
+// Deprecated - could not get Tesseract to give reliable results,
+// cloud solutions provide incredibly better results.
 export class TesseractOcr {
-  public async  getText(
-    imagePath: string,
-    englishWordsPath: string,
-    chineseWordsPath: string,
-  ) {
+  public async getText(imagePath: string, englishWordsPath: string, chineseWordsPath: string) {
     const baseConfiguration = { oem: 1, psm: 12 };
 
     const englishTextPromise = this.getEnglishText(baseConfiguration, imagePath, englishWordsPath);
@@ -17,22 +15,21 @@ export class TesseractOcr {
     };
   }
 
-  public async  getEnglishText(configuration: any, imagePath: string, englishWordsPath: string) {
+  public async getEnglishText(configuration: any, imagePath: string, englishWordsPath: string) {
     configuration.lang = 'eng';
     configuration['user-words'] = englishWordsPath;
-    let text: string = (await tesseract.recognize(imagePath, configuration));
+    let text: string = await tesseract.recognize(imagePath, configuration);
     text = text.replace(/[\r\n]+/g, '');
     console.log(`Found English text: ${JSON.stringify(text)}`);
     return text;
   }
 
-  public async  getChineseText(configuration: any, imagePath: string, chineseWordsPath: string) {
+  public async getChineseText(configuration: any, imagePath: string, chineseWordsPath: string) {
     configuration.lang = 'chi_sim';
     configuration['user-words'] = chineseWordsPath;
-    let text: string = (await tesseract.recognize(imagePath, configuration));
+    let text: string = await tesseract.recognize(imagePath, configuration);
     text = text.replace(/[\r\n]+/g, '');
     console.log(`Found Chinese text: ${JSON.stringify(text)}`);
     return text;
   }
-
 }

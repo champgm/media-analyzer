@@ -1,14 +1,15 @@
 import bodyParser from 'body-parser';
 import express from 'express';
+import JSON from 'circular-json';
+import middleware from 'aws-serverless-express/middleware';
+import morgan from 'morgan';
+
 import { configuration } from '../configuration';
 import { Configuration } from '../configurationExample';
 import { enumerateError, notEmpty } from './common/ObjectUtil';
-import JSON from 'circular-json';
-import { TwilioMessage } from './twilio/TwilioMessage';
-import { saveFile, sendSms, getFileBytes } from './twilio/Twilio';
 import { search } from './text/Search';
-import middleware from 'aws-serverless-express/middleware';
-import morgan from 'morgan';
+import { sendSms, getFileBytes } from './twilio/Twilio';
+import { TwilioMessage } from './twilio/TwilioMessage';
 import { Vision } from './text/Vision';
 
 process.on('unhandledRejection', (error) => {

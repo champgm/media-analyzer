@@ -1,5 +1,6 @@
 import AWS from 'aws-sdk';
 
+// Deprecated - Amazon has a 50 word cap on each image.
 export class RekognitionOcr {
   public async  getText(fileBytes) {
     const rekognition = new AWS.Rekognition();
